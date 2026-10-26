@@ -65,6 +65,8 @@ class Agentmemdb < Formula
 end
 RUBY
 fi
+# Maintainer commands like update-python-resources only load formulae from trusted taps
+brew trust --quiet --formula "$formula"
 sed -i '' -e "s|^  url \".*\"|  url \"$url\"|" -e "s|^  sha256 \".*\"|  sha256 \"$sha\"|" "$file"
 
 brew update-python-resources --ignore-main-package-cooldown "$formula"
