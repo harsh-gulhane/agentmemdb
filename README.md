@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-wordmark-dark.svg">
-    <img alt="agentmemdb" src="docs/assets/logo-wordmark-light.svg" width="420">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/harsh-gulhane/agentmemdb/main/docs/assets/logo-wordmark-dark.svg">
+    <img alt="agentmemdb" src="https://raw.githubusercontent.com/harsh-gulhane/agentmemdb/main/docs/assets/logo-wordmark-light.svg" width="420">
   </picture>
 </p>
 
@@ -14,15 +14,15 @@
   <a href="https://github.com/harsh-gulhane/agentmemdb/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/harsh-gulhane/agentmemdb/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white">
   <img alt="MCP server" src="https://img.shields.io/badge/MCP-server-7C3AED">
-  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
 </p>
 
 <p align="center">
-  <a href="docs/getting-started.md">Getting started</a> ·
-  <a href="docs/examples.md">Examples</a> ·
-  <a href="docs/configuration.md">Configuration</a> ·
-  <a href="docs/tools.md">Tools</a> ·
-  <a href="docs/architecture.md">Architecture</a>
+  <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/getting-started.md">Getting started</a> ·
+  <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/examples.md">Examples</a> ·
+  <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/configuration.md">Configuration</a> ·
+  <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/tools.md">Tools</a> ·
+  <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/architecture.md">Architecture</a>
 </p>
 
 ---
@@ -49,7 +49,7 @@ You → omp           (next day) Why are we moving billing to Postgres?
                        "snippet": "…we need row-level security to isolate merchants, which MySQL does not offer…"}]}
 ```
 
-The [examples](docs/examples.md) walk through the full session: appending from a second agent, attribution, duplicate warnings, threads and entities, with real responses.
+The [examples](https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/examples.md) walk through the full session: appending from a second agent, attribution, duplicate warnings, threads and entities, with real responses.
 
 ## Quick start
 
@@ -73,7 +73,7 @@ claude mcp add memory -s user -- agentmemdb
 { "mcpServers": { "memory": { "type": "stdio", "command": "agentmemdb" } } }
 ```
 
-Claude Desktop, Cursor, VS Code, Codex and HTTP setups are in [getting started](docs/getting-started.md). To have agents save and search without being asked, add the [memory policy prompt](examples/memory-policy.md) to your `CLAUDE.md` or `AGENTS.md`.
+Claude Desktop, Cursor, VS Code, Codex and HTTP setups are in [getting started](https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/getting-started.md). To have agents save and search without being asked, add the [memory policy prompt](https://github.com/harsh-gulhane/agentmemdb/blob/main/examples/memory-policy.md) to your `CLAUDE.md` or `AGENTS.md`.
 
 ## Features
 
@@ -94,7 +94,7 @@ Claude Desktop, Cursor, VS Code, Codex and HTTP setups are in [getting started](
 | Threads and timeline | `get_thread`, `list_threads`, `get_daily_summary` |
 | Maintenance | `find_duplicates`, `cleanup_expired`, `get_stats` |
 
-Parameters and behaviour: [tool reference](docs/tools.md).
+Parameters and behaviour: [tool reference](https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/tools.md).
 
 ## Configuration
 
@@ -108,7 +108,7 @@ Optional. `~/.config/agentmemdb/config.json`:
 }
 ```
 
-Environment variables, path resolution, sharing and backups: [configuration](docs/configuration.md).
+Environment variables, path resolution, sharing and backups: [configuration](https://github.com/harsh-gulhane/agentmemdb/blob/main/docs/configuration.md).
 
 ## Development
 
@@ -118,12 +118,12 @@ make install    # uv sync: editable install plus dev tools
 make check      # ruff, mypy --strict, pytest
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the project layout and workflow.
+See [CONTRIBUTING.md](https://github.com/harsh-gulhane/agentmemdb/blob/main/CONTRIBUTING.md) for the project layout and workflow.
 
 ## Security
 
-agentmemdb stores memories unencrypted in a local file and makes no network calls. Read [SECURITY.md](SECURITY.md) for the security model, and report vulnerabilities privately through GitHub security advisories.
+agentmemdb stores memories unencrypted in a local file and makes no network calls. Read [SECURITY.md](https://github.com/harsh-gulhane/agentmemdb/blob/main/SECURITY.md) for the security model, and report vulnerabilities privately through GitHub security advisories.
 
 ## License
 
-[MIT](LICENSE) © Harsh Gulhane
+[MIT](https://github.com/harsh-gulhane/agentmemdb/blob/main/LICENSE) © Harsh Gulhane
