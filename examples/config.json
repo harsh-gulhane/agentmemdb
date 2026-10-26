@@ -1,0 +1,11 @@
+{
+  "db_path": "~/.local/share/agentmemdb/memory.db",
+  "auto_tags": {
+    "aws": "\\baws\\b|amazon web services",
+    "database": "postgres|mysql|sqlite|redis",
+    "incident": "incident|outage|breach",
+    "kubernetes": "kubernetes|k8s",
+    "terraform": "terraform|\\.tf\\b"
+  },
+  "instructions": "Search memory before answering questions about past work. After each non-trivial exchange, save a concise memory of decisions (with their reasons), findings and facts worth keeping. Use importance high for decisions and critical for incidents. Never save secrets."
+}

@@ -1,0 +1,38 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Include the tool call and its response if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: Output of `agentmemdb --check`
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: MCP client and version
+      placeholder: e.g. Claude Code 2.1, omp 18.12
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Python version
+      placeholder: e.g. macOS 27, Python 3.14
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Any error output from the client's MCP logs. Remove anything private from your memories first.
+      render: text

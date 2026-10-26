@@ -1,0 +1,6 @@
+include CHANGELOG.md CONTRIBUTING.md SECURITY.md
+graft docs
+graft examples
+graft tests
+global-exclude *.py[cod] __pycache__
+exclude docs/assets/social-preview.png

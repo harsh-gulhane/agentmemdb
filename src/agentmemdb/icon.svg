@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="agentmemdb">
+  <defs>
+    <linearGradient id="amdb-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#9333EA"/>
+    </linearGradient>
+    <linearGradient id="amdb-disc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E0E7FF"/>
+    </linearGradient>
+    <clipPath id="amdb-back"><rect width="256" height="128"/></clipPath>
+    <clipPath id="amdb-front"><rect y="128" width="256" height="128"/></clipPath>
+  </defs>
+  <rect width="256" height="256" rx="60" fill="url(#amdb-bg)"/>
+  <g transform="rotate(-18 128 128)" fill="none" stroke="#FBBF24" stroke-width="7">
+    <ellipse cx="128" cy="128" rx="104" ry="32" clip-path="url(#amdb-back)"/>
+  </g>
+  <g fill="url(#amdb-disc)">
+    <ellipse cx="128" cy="72" rx="56" ry="19" fill="#FFFFFF"/>
+    <path d="M72 82A56 19 0 0 0 184 82V111A56 19 0 0 1 72 111Z"/>
+    <path d="M72 121A56 19 0 0 0 184 121V150A56 19 0 0 1 72 150Z"/>
+    <path d="M72 160A56 19 0 0 0 184 160V189A56 19 0 0 1 72 189Z"/>
+  </g>
+  <g transform="rotate(-18 128 128)" fill="#FBBF24">
+    <ellipse cx="128" cy="128" rx="104" ry="32" fill="none" stroke="#FBBF24" stroke-width="7" clip-path="url(#amdb-front)"/>
+    <circle cx="24" cy="128" r="13"/>
+    <circle cx="232" cy="128" r="13"/>
+    <circle cx="150" cy="159" r="13"/>
+  </g>
+</svg>
