@@ -1,12 +1,14 @@
 #!/bin/sh
-# Points the Homebrew formula in harsh-gulhane/homebrew-tap at agentmemdb <version> on PyPI, refreshes its
-# Python resources, installs and tests it with brew, then pushes the change. Creates the formula on the first
-# release. Run by scripts/release.sh.
+# Points the Homebrew formula in harsh-gulhane/homebrew-tap at agentmemdb <version> on PyPI and refreshes its
+# Python resources, then opens a pull request in the tap and merges it once the tap's formulae workflow has
+# audited, installed and tested it on macOS and Linux. Run by scripts/release.sh. Uses your gh login.
 set -eu
 
 version=${1:?usage: scripts/update-formula.sh <version>}
 tap=harsh-gulhane/tap
+tap_repo=harsh-gulhane/homebrew-tap
 formula=$tap/agentmemdb
+branch=agentmemdb-$version
 
 fail() { echo "update-formula: $*" >&2; exit 1; }
 
@@ -25,60 +27,41 @@ sha=${sdist#* }
 
 brew tap "$tap" >/dev/null
 dir=$(brew --repo "$tap")
-git -C "$dir" pull -q --ff-only
 file="$dir/Formula/agentmemdb.rb"
-if [ ! -f "$file" ]; then
-  mkdir -p "$dir/Formula"
-  # Native dependencies come from Homebrew's bottles; update-python-resources adds the rest
-  cat > "$file" <<'RUBY'
-class Agentmemdb < Formula
-  include Language::Python::Virtualenv
+[ -z "$(git -C "$dir" status --porcelain)" ] || fail "$dir has uncommitted changes"
+git -C "$dir" checkout -q main
+git -C "$dir" pull -q --ff-only
+[ -f "$file" ] || fail "$file does not exist"
 
-  desc "Local-first, shared long-term memory for AI agents over MCP"
-  homepage "https://github.com/harsh-gulhane/agentmemdb"
-  url "URL"
-  sha256 "SHA256"
-  license "MIT"
-
-  depends_on "certifi" => :no_linkage
-  depends_on "cryptography" => :no_linkage
-  depends_on "pydantic" => :no_linkage
-  depends_on "python@3.15"
-  depends_on "rpds-py" => :no_linkage
-
-  pypi_packages exclude_packages: %w[certifi cryptography pydantic rpds-py]
-
-  def install
-    virtualenv_install_with_resources
-  end
-
-  test do
-    assert_match version.to_s, shell_output("#{bin}/agentmemdb --version")
-
-    ENV["AGENTMEMDB_DB_PATH"] = testpath/"memory.db"
-    assert_match testpath.to_s, shell_output("#{bin}/agentmemdb --check")
-
-    request = '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18",' \
-              '"capabilities":{},"clientInfo":{"name":"brew","version":"1"}}}'
-    assert_match '"name":"agentmemdb"', pipe_output(bin/"agentmemdb", "#{request}\n", 0)
-  end
-end
-RUBY
-fi
 # Maintainer commands like update-python-resources only load formulae from trusted taps
 brew trust --quiet --formula "$formula"
 sed -i '' -e "s|^  url \".*\"|  url \"$url\"|" -e "s|^  sha256 \".*\"|  sha256 \"$sha\"|" "$file"
-
 brew update-python-resources --ignore-main-package-cooldown "$formula"
-brew audit --strict --online "$formula"
-if brew list --formula agentmemdb >/dev/null 2>&1; then brew reinstall "$formula"; else brew install "$formula"; fi
-brew test "$formula"
+brew style "$formula"
 
 if [ -z "$(git -C "$dir" status --porcelain Formula/agentmemdb.rb)" ]; then
   echo "formula already at $version"
-else
-  git -C "$dir" add Formula/agentmemdb.rb
-  git -C "$dir" commit -qm "agentmemdb $version"
-  git -C "$dir" push -q
-  echo "pushed agentmemdb $version to $tap"
+  exit 0
 fi
+
+git -C "$dir" checkout -q -b "$branch"
+git -C "$dir" commit -qam "agentmemdb $version"
+git -C "$dir" push -q -u origin "$branch"
+git -C "$dir" checkout -q main
+gh pr create -R "$tap_repo" --base main --head "$branch" --title "agentmemdb $version" \
+  --body "Updates agentmemdb to [$version](https://github.com/harsh-gulhane/agentmemdb/releases/tag/v$version)."
+
+echo "waiting for the formulae workflow…"
+checks=0
+for _ in 1 2 3 4 5 6 7 8 9 10 11 12; do
+  checks=$(gh pr checks "$branch" -R "$tap_repo" --json name --jq length 2>/dev/null || echo 0)
+  [ "$checks" -gt 0 ] && break
+  sleep 5
+done
+[ "$checks" -gt 0 ] || fail "the formulae workflow did not start"
+gh pr checks "$branch" -R "$tap_repo" --watch --fail-fast || fail "formula checks failed: $branch is left open"
+gh pr merge "$branch" -R "$tap_repo" --squash --delete-branch
+
+git -C "$dir" pull -q --ff-only
+git -C "$dir" branch -q -D "$branch"
+echo "agentmemdb $version is in $tap; upgrade with: brew upgrade agentmemdb"

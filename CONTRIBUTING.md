@@ -67,6 +67,6 @@ Maintainers only. Releases are published from GitHub Actions with PyPI trusted p
 2. On an up-to-date `main`, run `scripts/release.sh x.y.z`. It:
    - tags `vx.y.z` and pushes the tag;
    - waits for the [release workflow](.github/workflows/release.yml), which tests, builds, uploads to PyPI and creates the GitHub release with the changelog notes;
-   - runs `scripts/update-formula.sh`, which points the Homebrew formula in [harsh-gulhane/homebrew-tap](https://github.com/harsh-gulhane/homebrew-tap) at the new version, refreshes its Python resources, installs and tests it, and pushes.
+   - runs `scripts/update-formula.sh`, which points the Homebrew formula in [harsh-gulhane/homebrew-tap](https://github.com/harsh-gulhane/homebrew-tap) at the new version, refreshes its Python resources and opens a pull request there. The tap's workflow audits, installs and tests the formula on macOS and Linux, and the script merges the pull request once it passes.
 
 Dependabot opens weekly pull requests for new versions of Python packages, GitHub Actions and pre-commit hooks; CI must pass before merging them.
