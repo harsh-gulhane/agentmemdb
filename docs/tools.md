@@ -82,7 +82,7 @@ List saved memories with optional filters. Expired memories excluded by default.
 | Parameter | Type | Default | Description |
 |-|-|-|-|
 | `category` | string | `""` | Filter by category (optional) |
-| `tag` | string | `""` | Filter by tag (optional) |
+| `tag` | string | `""` | Filter by a single tag, case-insensitive (optional) |
 | `thread_id` | string | `""` | Filter by thread ID to see all related memories (optional) |
 | `limit` | integer | `25` | Maximum number of results (default: 25, max: 200) |
 | `include_expired` | boolean | `false` | Set to true to include expired memories (default: false) |

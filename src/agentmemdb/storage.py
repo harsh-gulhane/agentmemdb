@@ -3,9 +3,9 @@
 import os
 import sqlite3
 
-from agentmemdb.models import is_expired
+from agentmemdb.models import is_expired, join_tags, parse_tags
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 BUSY_TIMEOUT_SECONDS = 10
 
 SCHEMA = """
@@ -114,6 +114,8 @@ def migrate(db: sqlite3.Connection) -> None:
     db.execute("BEGIN IMMEDIATE")
     if db.execute("PRAGMA user_version").fetchone()[0] < 1:
         _migrate_to_v1(db)
+    if db.execute("PRAGMA user_version").fetchone()[0] < 2:
+        _migrate_to_v2(db)
     db.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     db.commit()
 
@@ -134,3 +136,10 @@ def _migrate_to_v1(db: sqlite3.Connection) -> None:
     db.execute(
         "DELETE FROM entities WHERE id NOT IN (SELECT MIN(id) FROM entities GROUP BY memory_id, entity_type, entity_value)"
     )
+
+
+def _migrate_to_v2(db: sqlite3.Connection) -> None:
+    """Normalize tags that older update_memory stored verbatim (e.g. "a, b"), so the tag filter finds them."""
+    rows = db.execute("SELECT id, tags FROM memories WHERE tags != ''").fetchall()
+    updates = [(tags, r["id"]) for r in rows if (tags := join_tags(parse_tags(r["tags"]))) != r["tags"]]
+    db.executemany("UPDATE memories SET tags = ? WHERE id = ?", updates)

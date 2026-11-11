@@ -20,7 +20,9 @@ from agentmemdb.models import (
     check_expiry,
     check_importance,
     clamp,
+    escape_like,
     is_expired,
+    join_tags,
     parse_entities,
     parse_tags,
     utc_now,
@@ -139,7 +141,7 @@ def save_memory(
     db = store.connect()
     duplicates = find_similar(db, topic)
     auto_tags = settings.tags_for(topic, content)
-    tags_str = ",".join(dict.fromkeys(parse_tags(tags) + auto_tags))
+    tags_str = join_tags(parse_tags(tags), auto_tags)
 
     now = utc_now().isoformat()
     cursor = db.execute(
@@ -200,7 +202,7 @@ def append_memory(memory_id: int, content: str, source: str = "") -> str:
 
     db.execute(
         "UPDATE memories SET content = ?, tags = ?, updated_at = ? WHERE id = ?",
-        (row["content"] + separator + content, ",".join(existing_tags + new_tags), now.isoformat(), memory_id),
+        (row["content"] + separator + content, join_tags(existing_tags, new_tags), now.isoformat(), memory_id),
     )
     db.execute(
         "INSERT INTO memory_history (memory_id, action, content_snippet, created_at) VALUES (?, ?, ?, ?)",
@@ -266,11 +268,14 @@ def list_memories(
 
     Args:
         category: Filter by category (optional)
-        tag: Filter by tag (optional)
+        tag: Filter by a single tag, case-insensitive (optional)
         thread_id: Filter by thread ID to see all related memories (optional)
         limit: Maximum number of results (default: 25, max: 200)
         include_expired: Set to true to include expired memories (default: false)
     """
+    tag = tag.strip()
+    if "," in tag:
+        raise ToolError("tag filter takes a single tag")
     db = store.connect()
     filter_sql, params = filters(category, include_expired=include_expired)
     sql = (
@@ -278,8 +283,8 @@ def list_memories(
         f"m.updated_at FROM memories m WHERE 1=1{filter_sql}"
     )
     if tag:
-        sql += " AND ',' || m.tags || ',' LIKE ?"
-        params.append(f"%,{tag.strip()},%")
+        sql += " AND instr(LOWER(',' || m.tags || ','), LOWER(?)) > 0"
+        params.append(f",{tag},")
     if thread_id:
         sql += " AND m.thread_id = ?"
         params.append(thread_id)
@@ -346,7 +351,7 @@ def update_memory(
         "topic": topic,
         "content": content,
         "category": category,
-        "tags": tags,
+        "tags": join_tags(parse_tags(tags)),
         "importance": importance,
         "thread_id": thread_id,
         "expires_at": expires_at,
@@ -409,8 +414,8 @@ def find_by_entity(entity_type: str = "", entity_value: str = "", limit: int = 2
         sql += " AND e.entity_type = ?"
         params.append(entity_type.strip().lower())
     if entity_value:
-        sql += " AND e.entity_value LIKE ?"
-        params.append(f"%{entity_value.strip().lower()}%")
+        sql += " AND e.entity_value LIKE ? ESCAPE '\\'"
+        params.append(f"%{escape_like(entity_value.strip().lower())}%")
     sql += " ORDER BY m.updated_at DESC LIMIT ?"
     params.append(clamp(limit, 200))
 

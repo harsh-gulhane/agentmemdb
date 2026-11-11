@@ -66,3 +66,21 @@ def test_migration_from_v0_schema(tmp_path: Path, call: Call, monkeypatch: pytes
         assert db.execute("SELECT entity_type, entity_value FROM entities").fetchall() == [("org", "acme")]
         assert "previous_content" in [r[1] for r in db.execute("PRAGMA table_info(memory_history)")]
         db.execute("INSERT INTO memories_fts(memories_fts) VALUES ('integrity-check')")
+
+
+def test_migration_normalizes_tags_from_v1(tmp_path: Path, call: Call, monkeypatch: pytest.MonkeyPatch) -> None:
+    path = str(tmp_path / "v1.db")
+    with closing(sqlite3.connect(path)) as legacy:
+        legacy.executescript(SCHEMA)
+        legacy.execute(
+            "INSERT INTO memories (topic, content, tags, created_at, updated_at) "
+            "VALUES ('Spaced tags', 'c', 'postgres, database ,postgres', 'now', 'now')"
+        )
+        legacy.execute("PRAGMA user_version = 1")
+        legacy.commit()
+
+    monkeypatch.setattr(server, "store", Store(path))
+    assert call(server.list_memories, tag="database")["count"] == 1
+    with closing(sqlite3.connect(path)) as db:
+        assert db.execute("SELECT tags, updated_at FROM memories").fetchone() == ("postgres,database", "now")
+        db.execute("INSERT INTO memories_fts(memories_fts) VALUES ('integrity-check')")
