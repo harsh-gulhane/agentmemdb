@@ -1,7 +1,7 @@
 #!/bin/sh
 # Points the Homebrew formula in harsh-gulhane/homebrew-tap at agentmemdb <version> on PyPI and refreshes its
 # Python resources, then opens a pull request in the tap and merges it once the tap's formulae workflow has
-# audited, installed and tested it on macOS and Linux. Run by scripts/release.sh. Uses your gh login.
+# audited, installed and tested it on macOS and Linux. Run after the release workflow publishes <version>. Uses your gh login.
 set -eu
 
 version=${1:?usage: scripts/update-formula.sh <version>}
