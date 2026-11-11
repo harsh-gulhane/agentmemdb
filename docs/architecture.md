@@ -96,6 +96,7 @@ The schema version is stored in `PRAGMA user_version`. On the first connection, 
 | Version | Change |
 |-|-|
 | 1 | Porter stemming in the FTS index (rebuilt), `memory_history.previous_content`, lowercased and deduplicated entities |
+| 2 | Tags normalized to a comma-separated list with no spaces or repeats |
 
 ## Design choices
 

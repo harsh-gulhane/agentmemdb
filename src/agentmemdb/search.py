@@ -4,7 +4,7 @@ import re
 import sqlite3
 from typing import Any
 
-from agentmemdb.models import IMPORTANCE_LEVELS, IMPORTANCE_RANK
+from agentmemdb.models import IMPORTANCE_LEVELS, IMPORTANCE_RANK, escape_like
 
 Row = dict[str, Any]
 
@@ -79,10 +79,11 @@ def _search_substring(db: sqlite3.Connection, query: str, filter_sql: str, filte
     if not words:
         return []
 
-    where = " OR ".join("(m.topic LIKE ? OR m.content LIKE ? OR m.tags LIKE ?)" for _ in words)
+    like = "LIKE ? ESCAPE '\\'"
+    where = " OR ".join(f"(m.topic {like} OR m.content {like} OR m.tags {like})" for _ in words)
     rows = db.execute(
         f"SELECT {SEARCH_COLUMNS}, m.content FROM memories m WHERE ({where}){filter_sql}",
-        [f"%{w}%" for w in words for _ in range(3)] + filter_params,
+        [f"%{escape_like(w)}%" for w in words for _ in range(3)] + filter_params,
     ).fetchall()
 
     scored = []

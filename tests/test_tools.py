@@ -99,6 +99,36 @@ def test_update_keeps_previous_content(call: Call) -> None:
     assert "error" in call(server.update_memory, memory_id=mid, category="nope")
 
 
+def test_update_normalizes_tags_for_tag_filter(call: Call) -> None:
+    mid = call(server.save_memory, topic="Tag update", content="x", tags="old")["id"]
+    call(server.update_memory, memory_id=mid, tags="postgres, database ,postgres")
+    assert call(server.get_memory, memory_id=mid)["tags"] == "postgres,database"
+    assert call(server.list_memories, tag="database")["count"] == 1
+    assert call(server.update_memory, memory_id=mid, tags="postgres ,database")["status"] == "unchanged"
+
+
+def test_tag_filter_matches_whole_tags_only(call: Call) -> None:
+    call(server.save_memory, topic="Wildcard bait", content="x", tags="axb,Billing")
+    assert call(server.list_memories, tag="a_b")["count"] == 0
+    assert call(server.list_memories, tag="%")["count"] == 0
+    assert call(server.list_memories, tag="billing")["count"] == 1
+    assert "error" in call(server.list_memories, tag="axb,billing")
+
+
+def test_entity_value_wildcards_match_literally(call: Call) -> None:
+    entities = '[{"type":"service","value":"billingxapi"}]'
+    call(server.save_memory, topic="Entity bait", content="x", entities=entities)
+    assert call(server.find_by_entity, entity_value="billing_api")["count"] == 0
+    assert call(server.find_by_entity, entity_value="ing%a")["count"] == 0
+    assert call(server.find_by_entity, entity_value="ingxa")["count"] == 1
+
+
+def test_substring_search_treats_underscore_literally(call: Call) -> None:
+    call(server.save_memory, topic="Underscore bait", content="billingxapi rollout")
+    assert call(server.search_memory, query="billing_api")["count"] == 0
+    assert call(server.search_memory, query="ingxa")["count"] == 1
+
+
 def test_append_reports_only_new_tags(call: Call) -> None:
     mid = call(server.save_memory, topic="Append target", content="about datadog")["id"]
     assert call(server.append_memory, memory_id=mid, content="more datadog", source="omp")["new_tags"] is None

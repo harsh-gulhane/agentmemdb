@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- `update_memory` now normalizes tags like `save_memory` (split on commas, trim, dedupe), so `list_memories(tag=...)` finds updated memories (#5)
+- Tags stored with spaces by earlier versions are normalized when the database is upgraded (schema version 2)
+- `list_memories(tag=...)` matches whole tags only: `%` and `_` no longer act as wildcards, and a comma returns an error
+- `find_by_entity` and the substring fallback of `search_memory` treat `%` and `_` literally (e.g. `billing_api` no longer matches `billingxapi`)
+
 ## [0.1.0] - 2026-10-26
 
 First public release.

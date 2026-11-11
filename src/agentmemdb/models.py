@@ -62,7 +62,18 @@ def check_expiry(expires_at: str) -> None:
 
 
 def parse_tags(tags: str) -> list[str]:
-    return [t.strip() for t in tags.split(",") if t.strip()]
+    """Split comma-separated tags, trimming whitespace and dropping empty and repeated tags."""
+    return list(dict.fromkeys(t.strip() for t in tags.split(",") if t.strip()))
+
+
+def join_tags(*tag_lists: list[str]) -> str:
+    """Store tags as one comma-separated string with no spaces or repeats, as the tag filter expects."""
+    return ",".join(dict.fromkeys(t for tags in tag_lists for t in tags))
+
+
+def escape_like(value: str) -> str:
+    """Make % and _ match literally in a LIKE pattern that uses ESCAPE '\\'."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 def parse_entities(entities: str) -> list[tuple[str, str]]:
