@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-11
+
 ### Fixed
 
 - `update_memory` now normalizes tags like `save_memory` (split on commas, trim, dedupe), so `list_memories(tag=...)` finds updated memories (#5)
@@ -27,5 +29,6 @@ First public release.
 - stdio and streamable HTTP transports; `--check` and `--version` flags
 - Server name, version and icon reported to MCP clients
 
-[Unreleased]: https://github.com/harsh-gulhane/agentmemdb/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/harsh-gulhane/agentmemdb/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/harsh-gulhane/agentmemdb/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/harsh-gulhane/agentmemdb/releases/tag/v0.1.0
