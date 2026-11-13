@@ -15,6 +15,7 @@
   <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white">
   <img alt="MCP server" src="https://img.shields.io/badge/MCP-server-7C3AED">
   <a href="https://github.com/harsh-gulhane/agentmemdb/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <a href="https://m8ven.ai/mcp/harsh-gulhane/agentmemdb?s=readme"><img alt="M8ven Score" src="https://m8ven.ai/badge/mcp/harsh-gulhane/agentmemdb"></a>
 </p>
 
 <p align="center">
