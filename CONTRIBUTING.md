@@ -36,7 +36,7 @@ src/agentmemdb/
   search.py     FTS5 search, substring fallback, duplicate detection
   models.py     categories, importance levels, input validation
 tests/          pytest suite; test_e2e.py drives real MCP sessions
-scripts/        release.sh and update-formula.sh for maintainers
+scripts/        update-formula.sh for maintainers
 docs/           user documentation and logo assets
 examples/       example config and memory policy prompt
 ```
@@ -63,10 +63,8 @@ examples/       example config and memory policy prompt
 
 Maintainers only. Releases are published from GitHub Actions with PyPI trusted publishing, so no PyPI token is stored anywhere.
 
-1. Set `__version__` in `src/agentmemdb/__init__.py`, move the **Unreleased** changelog entries under `## [x.y.z] - <date>`, and merge to `main`.
-2. On an up-to-date `main`, run `scripts/release.sh x.y.z`. It:
-   - tags `vx.y.z` and pushes the tag;
-   - waits for the [release workflow](.github/workflows/release.yml), which tests, builds, uploads to PyPI and creates the GitHub release with the changelog notes;
-   - runs `scripts/update-formula.sh`, which points the Homebrew formula in [harsh-gulhane/homebrew-tap](https://github.com/harsh-gulhane/homebrew-tap) at the new version, refreshes its Python resources and opens a pull request there. The tap's workflow audits, installs and tests the formula on macOS and Linux, and the script merges the pull request once it passes.
+1. Open a pull request that sets `__version__` in `src/agentmemdb/__init__.py` and moves the **Unreleased** changelog entries under `## [x.y.z] - <date>`.
+2. Merge it. The [release workflow](.github/workflows/release.yml) runs on every push to `main` that touches `src/agentmemdb/__init__.py`. When `vx.y.z` doesn't exist yet, it tests, builds, uploads to PyPI, then tags the commit and creates the GitHub release with the changelog notes. A version that is already tagged is skipped, and a version without a changelog section fails the run.
+3. Once the release is out, run `scripts/update-formula.sh x.y.z`. It points the Homebrew formula in [harsh-gulhane/homebrew-tap](https://github.com/harsh-gulhane/homebrew-tap) at the new version, refreshes its Python resources and opens a pull request there. The tap's workflow audits, installs and tests the formula on macOS and Linux, and the script merges the pull request once it passes.
 
 Dependabot opens weekly pull requests for new versions of Python packages, GitHub Actions and pre-commit hooks; CI must pass before merging them.

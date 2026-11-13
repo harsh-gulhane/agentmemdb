@@ -1,20 +1,49 @@
-# Publishes a version when scripts/release.sh pushes its v<version> tag: builds and tests, uploads to PyPI
-# with trusted publishing (no stored token), then creates the GitHub release with the changelog notes.
+# Publishes a release whenever a push to main changes __version__ to a version that has no v<version> tag yet:
+# builds and tests, uploads to PyPI with trusted publishing (no stored token), then creates the v<version> tag
+# and GitHub release with the changelog notes. The tag comes last, so a failed run leaves nothing behind to skip.
+# Keep this file name: the PyPI trusted publisher is registered for release.yml.
 name: release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths: [src/agentmemdb/__init__.py]
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Find the version and whether it is already released
+        id: version
+        run: |
+          version=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/agentmemdb/__init__.py)
+          [ -n "$version" ] || { echo "::error::no __version__ in src/agentmemdb/__init__.py"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$version" >/dev/null; then
+            echo "::notice::v$version is already released"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          grep -q "^## \[$version\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no ## [$version] section"; exit 1; }
+          echo "release=true" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: check
+    if: needs.check.outputs.release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -24,11 +53,6 @@ jobs:
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: "3.14"
-      - name: Check the tag matches the version and changelog
-        run: |
-          version=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/agentmemdb/__init__.py)
-          [ "$GITHUB_REF_NAME" = "v$version" ] || { echo "::error::tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
-          grep -q "^## \[$version\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no ## [$version] section"; exit 1; }
       - run: uv sync --locked
       - run: uv run pytest
       - run: uv build
@@ -54,9 +78,12 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          # A rerun after a failed GitHub release step finds the files already on PyPI
+          skip-existing: true
 
   github-release:
-    needs: pypi
+    needs: [check, pypi]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -69,10 +96,10 @@ jobs:
         with:
           name: dist
           path: dist/
-      - name: Create the GitHub release
+      - name: Tag the commit and create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check.outputs.version }}
         run: |
-          version=${GITHUB_REF_NAME#v}
-          awk -v v="## [$version]" 'index($0, v) == 1 {on = 1; next} /^## \[/ || /^\[[^]]*\]: / {on = 0} on' CHANGELOG.md > notes.md
-          gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --title "agentmemdb $version" --notes-file notes.md
+          awk -v v="## [$VERSION]" 'index($0, v) == 1 {on = 1; next} /^## \[/ || /^\[[^]]*\]: / {on = 0} on' CHANGELOG.md > notes.md
+          gh release create "v$VERSION" dist/* --target "$GITHUB_SHA" --title "agentmemdb $VERSION" --notes-file notes.md
